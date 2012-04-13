@@ -1,5 +1,6 @@
 ## Ejemplo de color de ojos y pelo
 ## Referencia: Kruschke. Doing Bayesian data analysis.
+old <- theme_update(plot.background = theme_rect(fill = NA, colour =NA))
 
 tabla.1 <- data.frame(HairEyeColor)
 tabla.h <- subset(tabla.1, Sex == 'Female', select = -Sex)
@@ -19,8 +20,8 @@ jags.params <- c('beta.p', 'beta.o', 'beta.op', 'o.sigma', 'p.sigma', 'op.sigma'
 
 fit.poisson <- jags(model.file = model.file,
    data = jags.data, parameters.to.save = jags.params,
-   n.chains = 2, n.burnin = 1000, n.thin =1, DIC = FALSE,
-   n.iter = 2000)
+   n.chains = 2, n.burnin = 1000, n.thin =10, DIC = FALSE,
+   n.iter = 5000)
 
 plot(fit.poisson)
 # ================
@@ -47,7 +48,37 @@ resumen.p <- ddply(sims.porcentaje, c('Hair', 'Eye'), summarise,
    obs= mean(Porc.obs), .drop = FALSE)
 resumen.p
 
+## Pésima elección de colores con las etiquetas!
 ggplot(resumen.p, aes(x=Hair, y=sim.media, ymin = sim.media - 2*sim.sd,
    ymax = sim.media + 2*sim.sd,
    colour=Eye, group=Eye)) + geom_point() +
-   geom_linerange() + geom_line() + geom_point(aes(x=Hair, y=obs), size=3)
+   geom_linerange() + geom_line() + geom_point(aes(x=Hair, y=obs), size=3) + 
+   col.ptos
+   
+
+# =======================
+# = Perfiles            =
+# =======================   
+sims.perfiles <- ddply(sims.porcentaje, c('sim.num', 'Eye'), transform,
+   perfil.col = 100*Porc.sim/mean(Porc.sim), 
+   obs.perfil = 100*Porc.obs/mean(Porc.obs),
+   .progress ='text')
+
+resumen.perf <-   ddply(sims.perfiles, c('Hair', 'Eye'), summarise,
+   sim.media = mean(perfil.col, na.rm =TRUE), sim.sd = sd(perfil.col, na.rm =TRUE),
+   perfil.obs= mean(obs.perfil), .drop = FALSE) 
+
+
+ggplot(resumen.perf, aes(x=Hair, y=sim.media, ymin = sim.media - 2*sim.sd,
+   ymax = sim.media + 2*sim.sd)) + geom_hline(yintercept = 100, col = 'gray') +
+   geom_linerange(size=2, alpha=0.5, col ='salmon') + 
+   geom_point(size=2) +
+   geom_line() + facet_wrap(~Eye) +
+   geom_point(aes(x=Hair, y=perfil.obs), size=3)
+
+ggplot(resumen.perf, aes(x=Eye, y=sim.media, ymin = sim.media - 2*sim.sd,
+   ymax = sim.media + 2*sim.sd, group = Hair)) + 
+    geom_linerange(size=2, alpha=0.7, colour='salmon') +
+   geom_hline(yintercept = 100, col = 'gray') + geom_point(size=2) +
+   geom_line(colour='salmon') + facet_wrap(~Hair)  
+
