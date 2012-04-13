@@ -1,0 +1,31 @@
+model{
+	for(i in 1:n.celdas){
+		frec.1[i] ~ dpois(exp(beta[i]))
+		beta[i] <- beta.0 + beta.o[ojos[i]] + beta.p[pelo[i]] + beta.op[ojos[i],pelo[i]]
+		sim.n[i] ~ dpois(exp(beta[i]))
+	}
+		
+	beta.0 ~ dnorm(10,0.0001)
+	
+	for(j in 1:n.ojos){
+		beta.o[j] ~ dnorm(0, o.tau)
+	}	
+	o.tau <- pow(o.sigma, -2)
+	o.sigma ~ dunif(0.001,1000)
+	
+	for(j in 1:n.pelo){
+		beta.p[j] ~ dnorm(0, p.tau)
+	}	
+	p.tau <- pow(p.sigma, -2)
+	p.sigma ~ dunif(0.001,1000)
+	
+	for(j in 1:n.ojos){
+		for(k in 1:n.pelo){
+			beta.op[j,k] ~ dnorm(0, op.tau)
+		}
+	}
+	op.tau <- pow(op.sigma, -2)
+	op.sigma ~ dunif(0.001,1000)	
+
+
+}
