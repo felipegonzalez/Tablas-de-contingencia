@@ -11,7 +11,7 @@ eval.imagen <- as.numeric(tab.sc$Var3)
 frec.1 <- tab.sc$Freq
 n.celdas <- nrow(tab.sc)
 
-model.file <- 'modelo_3_vars.bug'
+model.file <- './src/modelo_3_vars.bugs'
 jags.data <- c('sexo', 'ciudad', 'eval.imagen', 'frec.1', 'n.celdas')
 jags.params <- c('beta.0', 'beta.s', 'beta.c', 'beta.sc', 'beta.se', 
 		'beta.ce')

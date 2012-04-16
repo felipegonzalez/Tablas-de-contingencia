@@ -12,20 +12,20 @@ model{
 	beta.0 ~ dnorm(0,0.0001)
 	
 	for(j in 1:2){
-		beta.c[j] ~ dnorm(0, o.tau)
+		beta.c[j] ~ dnorm(0, c.tau)
 	}	
 	c.tau <- pow(c.sigma, -2)
 	c.sigma ~ dunif(0.001,1000)
 	
 	for(j in 1:2){
-		beta.s[j] ~ dnorm(0, o.tau)
+		beta.s[j] ~ dnorm(0, s.tau)
 	}	
 	s.tau <- pow(s.sigma, -2)
 	s.sigma ~ dunif(0.001,1000)
 
 
 	for(j in 1:3){
-		beta.e[j] ~ dnorm(0, o.tau)
+		beta.e[j] ~ dnorm(0, e.tau)
 	}	
 	e.tau <- pow(e.sigma, -2)
 	e.sigma ~ dunif(0.001,1000)
@@ -48,7 +48,7 @@ model{
 
 	for(j in 1:2){
 		for(k in 1:3){
-			beta.ce[j,k] ~ dnorm(0, se.tau)
+			beta.ce[j,k] ~ dnorm(0, ce.tau)
 		}
 	}
 	ce.tau <- pow(ce.sigma, -2)
