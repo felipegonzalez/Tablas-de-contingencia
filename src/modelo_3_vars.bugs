@@ -5,8 +5,7 @@ model{
 			beta.e[eval.imagen[i]] +
 			beta.sc[sexo[i], ciudad[i]] +
 			beta.se[sexo[i], eval.imagen[i]] +
-			beta.ce[ciudad[i], eval.imagen[i]] +
-			beta.sce[sexo[i], ciudad[i], eval.imagen[i]]
+			beta.ce[ciudad[i], eval.imagen[i]] 
 		sim.n[i] ~ dpois(exp(beta[i]))
 	}
 		

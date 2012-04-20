@@ -1,0 +1,106 @@
+\documentclass{article}
+%\documentclass[nohyper,justified]{tufte-handout}
+%\usepackage[sc]{mathpazo}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage[utf8x]{inputenc}
+\usepackage[spanish]{babel}
+\decimalpoint
+%\geometry{verbose,lmargin=2.5cm,rmargin=6cm}
+%\setcounter{secnumdepth}{2}
+%\setcounter{tocdepth}{2}
+\usepackage{url}
+\usepackage{tikz}
+\usepackage[unicode=true]
+ {hyperref}
+ 
+ \newenvironment{remark}[1][Observaci\'on]{\begin{trivlist}
+ \item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+ 
+ \newenvironment{example}[1][Ejemplo]{\begin{trivlist}
+ \item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+%\usepackage[unicode=true,pdfusetitle,
+% bookmarks=true,bookmarksnumbered=true,bookmarksopen=true,bookmarksopenlevel=2,
+% breaklinks=false,pdfborder={0 0 1},backref=false,colorlinks=false]
+% {hyperref}
+ 
+%\hypersetup{
+% pdfstartview={XYZ null null 1}}
+\usepackage{breakurl}
+\definecolor{MySalmon}{rgb}{1,0.95,0.95} 
+\definecolor{shadecolor}{named}{MySalmon}
+
+\makeatletter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\topfraction}{0.8}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\floatpagefraction}{0.75}
+
+\usepackage[buttonsize=1em]{animate}
+
+\hypersetup{breaklinks=true,pdfstartview=FitH}
+% \usepackage{Sweave}  % no Sweave please
+\title{Examen 1}
+
+
+%\author{Felipe Gonz\'alez}
+%\makeatother
+
+\begin{document}
+
+%
+\SweaveOpts{background=0.94;0.94;0.94}
+
+<<setup,echo=FALSE,results=hide,message=FALSE>>=
+options(replace.assign = TRUE, width = 80)
+knit_hooks$set(fig=function(before, options, envir){if (before && options$fig.show!='none') par(mar=c(4,4,.1,.1),cex.lab=.95,cex.axis=.9,mgp=c(2,.7,0),tcl=-.3)}, crop=hook_pdfcrop)
+@
+
+<<setup_2,echo=FALSE,results=hide,message=FALSE>>=
+library(FactoMiner)
+library(ggplot2)
+library(lubridate)
+library(L15LUtils)
+old <- theme_update(plot.background = theme_rect(fill = NA, colour =NA))
+@
+
+<<>>=
+load('./cache/sims.porcentaje.RData')
+load('./cache/tea.2.RData')
+
+round(100*prop.table(table(tea.2$gpo, tea.2$sex), margin=2))
+round(100*prop.table(table(tea.2$gpo, tea.2$age_Q), margin=2))
+
+@
+
+¿Cambia la composición dentro de las mujeres con la edad? 
+<<>>=
+table(tea.2$sex, tea.2$age_Q)
+round(100*prop.table(table(tea.2$gpo, interaction(tea.2$sex, tea.2$age_Q) ), margin=2))
+
+difsig(100*prop.table(table(tea.2$gpo, interaction(tea.2$sex, tea.2$age_Q)), margin=2),
+	as.numeric(table(tea.2$sex, tea.2$age_Q)))
+@
+¿Cómo saber? No se pueden hacer diferencias significativas (bases chicas)
+Sin embargo, es posible hacer un análisis con cuidado:
+
+<<test,fig=TRUE,fig.width=8,fig.height=12,out.width=12cm,out.height=12cm>>=
+resumen.p <- ddply(sims.porcentaje, c('Var1', 'Var2','Var3'), summarise,
+   sim.media = mean(Porc.sim, na.rm =TRUE), 
+   superior = quantile(Porc.sim, 0.90, na.rm = TRUE),
+   inferior = quantile(Porc.sim, 0.10, na.rm = TRUE),
+   sim.sd = sd(Porc.sim, na.rm =TRUE),
+   obs = mean(Porc.obs),
+       .drop = FALSE)
+#resumen.p
+resumen.p[resumen.p$Var1=='+60','Var1'] <- '60+'
+ggplot(resumen.p, aes(x=Var3, y=100*sim.media,ymin=100*inferior,ymax=100*superior,
+   colour=Var1, group=Var1)) + geom_point() + facet_grid(Var1~Var2) +
+   geom_linerange(size=1.0) +
+    geom_line() + 
+   geom_point(aes(x=Var3, y=100*obs), size=3) 
+@
+
+\end{document}
